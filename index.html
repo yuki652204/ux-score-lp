@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UXスコア診断ツール | 入力フォームのUXを自動採点</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080c14;
+    --surface: #0f1520;
+    --surface2: #161e2e;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0f4ff;
+    --muted: #7a8ba8;
+    --accent1: #3b82f6;
+    --accent2: #8b5cf6;
+    --accent3: #06b6d4;
+    --grad: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    --grad2: linear-gradient(135deg, #06b6d4, #3b82f6);
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── BG mesh ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(59,130,246,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 80%, rgba(139,92,246,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(6,182,212,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(8,12,20,0.7);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-links {
+    display: flex; align-items: center; gap: 32px;
+  }
+  .nav-links a {
+    color: var(--muted); font-size: 14px; font-weight: 500;
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  @media (max-width: 768px) { .nav-links { display: none; } }
+  .logo {
+    font-family: var(--font-display);
+    font-size: 18px; font-weight: 800;
+    background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+  .nav-cta {
+    padding: 9px 22px;
+    background: var(--grad);
+    color: #fff; font-weight: 600; font-size: 14px;
+    border: none; border-radius: 8px; cursor: pointer;
+    text-decoration: none;
+    transition: opacity .2s, transform .2s;
+  }
+  .nav-cta:hover { opacity: .85; transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 16px;
+    border: 1px solid rgba(59,130,246,0.4);
+    border-radius: 100px;
+    font-size: 13px; color: var(--accent1);
+    margin-bottom: 32px;
+    background: rgba(59,130,246,0.08);
+  }
+  .hero-badge span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent1); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(42px, 7vw, 80px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+    max-width: 900px;
+  }
+  h1 .grad-text {
+    background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 20px);
+    color: var(--muted);
+    max-width: 560px;
+    margin-bottom: 48px;
+    font-weight: 300;
+  }
+
+  .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .btn-primary {
+    padding: 16px 36px;
+    background: var(--grad);
+    color: #fff; font-size: 16px; font-weight: 600;
+    border: none; border-radius: 12px; cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 0 40px rgba(59,130,246,0.3);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 60px rgba(59,130,246,0.4); }
+  .btn-secondary {
+    padding: 16px 36px;
+    background: transparent;
+    color: var(--text); font-size: 16px; font-weight: 500;
+    border: 1px solid var(--border); border-radius: 12px; cursor: pointer;
+    text-decoration: none;
+    transition: border-color .2s, background .2s;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.04); }
+
+  /* hero score mockup */
+  .hero-mockup {
+    position: relative; z-index: 1;
+    margin-top: 72px;
+    width: 100%; max-width: 760px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+  }
+  .mockup-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 24px;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .score-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    margin-bottom: 24px;
+  }
+  .score-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .score-num {
+    font-family: var(--font-display);
+    font-size: 32px; font-weight: 800;
+    background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .score-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .score-bar-wrap { background: var(--surface2); border-radius: 8px; padding: 16px; }
+  .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-label { font-size: 13px; color: var(--muted); width: 120px; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; animation: grow 1.2s ease forwards; transform-origin: left; }
+  @keyframes grow { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+  .bar-val { font-size: 13px; font-weight: 600; width: 36px; text-align: right; }
+
+  /* ── SECTION commons ── */
+  section { position: relative; z-index: 1; padding: 100px 24px; }
+  .container { max-width: 1080px; margin: 0 auto; }
+  .section-label {
+    font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--accent3); margin-bottom: 16px;
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 4vw, 48px);
+    font-weight: 800; letter-spacing: -1.5px;
+    line-height: 1.1; margin-bottom: 20px;
+  }
+  .section-sub { font-size: 18px; color: var(--muted); max-width: 540px; font-weight: 300; }
+
+  /* ── PROBLEM ── */
+  .problem { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .problem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 56px; }
+  .problem-card {
+    border: 1px solid var(--border); border-radius: 16px;
+    padding: 32px;
+    background: var(--bg);
+    transition: border-color .2s;
+  }
+  .problem-card:hover { border-color: rgba(59,130,246,0.3); }
+  .problem-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--grad);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 20px;
+  }
+  .problem-card h3 { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+  .problem-card p { font-size: 15px; color: var(--muted); line-height: 1.7; }
+
+  /* ── FEATURES ── */
+  .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 64px; }
+  .feature-card {
+    border: 1px solid var(--border); border-radius: 20px;
+    padding: 40px;
+    background: var(--surface);
+    position: relative; overflow: hidden;
+    transition: transform .2s;
+  }
+  .feature-card:hover { transform: translateY(-4px); }
+  .feature-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--grad);
+  }
+  .feature-card.alt::before { background: var(--grad2); }
+  .feature-num {
+    font-family: var(--font-display);
+    font-size: 64px; font-weight: 800;
+    color: rgba(255,255,255,0.04);
+    position: absolute; top: 16px; right: 24px;
+    line-height: 1;
+  }
+  .feature-card h3 { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+  .feature-card p { font-size: 15px; color: var(--muted); line-height: 1.75; }
+  .tag {
+    display: inline-block; margin-top: 20px;
+    padding: 4px 12px; border-radius: 100px;
+    font-size: 12px; font-weight: 600;
+    background: rgba(59,130,246,0.12); color: var(--accent1);
+    border: 1px solid rgba(59,130,246,0.2);
+  }
+  .tag.green { background: rgba(6,182,212,0.1); color: var(--accent3); border-color: rgba(6,182,212,0.2); }
+
+  /* ── HOW IT WORKS ── */
+  .how { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: 64px; position: relative; }
+  .steps::before {
+    content: '';
+    position: absolute; top: 32px; left: 16.5%; right: 16.5%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(59,130,246,0.4), rgba(139,92,246,0.4), transparent);
+  }
+  .step { text-align: center; padding: 0 24px; }
+  .step-circle {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--grad);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 22px; font-weight: 800;
+    margin: 0 auto 24px;
+    box-shadow: 0 0 30px rgba(59,130,246,0.3);
+  }
+  .step h3 { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+  .step p { font-size: 14px; color: var(--muted); }
+
+  /* ── METRICS ── */
+  .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 64px; }
+  .metric-card {
+    text-align: center; padding: 48px 24px;
+    border: 1px solid var(--border); border-radius: 20px;
+    background: var(--surface);
+  }
+  .metric-val {
+    font-family: var(--font-display);
+    font-size: 56px; font-weight: 800;
+    background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .metric-label { font-size: 15px; color: var(--muted); margin-top: 8px; }
+
+  /* ── CTA ── */
+  .cta-section {
+    text-align: center; padding: 120px 24px;
+  }
+  .cta-box {
+    max-width: 640px; margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px; padding: 64px 48px;
+    position: relative; overflow: hidden;
+  }
+  .cta-box::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.15), transparent 60%);
+    pointer-events: none;
+  }
+  .cta-box h2 { font-size: clamp(28px, 4vw, 40px); margin-bottom: 16px; }
+  .cta-box p { color: var(--muted); margin-bottom: 40px; font-size: 16px; }
+
+  /* Contact form */
+  .contact-form { display: flex; flex-direction: column; gap: 16px; text-align: left; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 8px; }
+  label { font-size: 13px; font-weight: 500; color: var(--muted); }
+  input, textarea, select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: var(--font-body); font-size: 15px;
+    transition: border-color .2s;
+    outline: none;
+    width: 100%;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent1); }
+  textarea { resize: vertical; min-height: 100px; }
+  select option { background: var(--surface2); }
+  .btn-submit {
+    padding: 16px;
+    background: var(--grad);
+    color: #fff; font-size: 16px; font-weight: 600;
+    border: none; border-radius: 12px; cursor: pointer;
+    box-shadow: 0 0 40px rgba(59,130,246,0.25);
+    transition: transform .2s, box-shadow .2s;
+    margin-top: 8px;
+  }
+  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 0 60px rgba(59,130,246,0.4); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    color: var(--muted); font-size: 14px;
+    position: relative; z-index: 1;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .problem-grid, .features-grid, .steps, .metrics-grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .steps::before { display: none; }
+    .cta-box { padding: 40px 24px; }
+    footer { flex-direction: column; gap: 16px; text-align: center; }
+    .score-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* scroll animations */
+  .fade-up { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">UX Diagnostics</div>
+  <div class="nav-links">
+    <a href="#features">機能</a>
+    <a href="#how">使い方</a>
+    <a href="#metrics">実績</a>
+    <a href="#contact">料金・相談</a>
+  </div>
+  <a href="#contact" class="nav-cta">お問い合わせ</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"><span></span> AI搭載・フォームUX自動診断</div>
+  <h1>入力フォームのUXを<br><span class="grad-text">AIが瞬時に採点</span></h1>
+  <p class="hero-sub">URLを貼るだけ。問題箇所・改善提案・スコアをまとめてレポート出力。開発チームの工数を削減します。</p>
+  <div class="hero-actions">
+    <a href="#contact" class="btn-primary">お問い合わせ・デモ依頼</a>
+    <a href="#features" class="btn-secondary">機能を見る</a>
+  </div>
+
+  <!-- Score Mockup -->
+  <div class="hero-mockup">
+    <div class="mockup-header">
+      <div class="dot" style="background:#ff5f57"></div>
+      <div class="dot" style="background:#ffbd2e"></div>
+      <div class="dot" style="background:#28c840"></div>
+      <span style="margin-left:8px;font-size:13px;color:var(--muted)">UX診断レポート — checkout.example.com</span>
+    </div>
+    <div class="score-grid">
+      <div class="score-card"><div class="score-num">82</div><div class="score-label">総合スコア</div></div>
+      <div class="score-card"><div class="score-num">91</div><div class="score-label">アクセシビリティ</div></div>
+      <div class="score-card"><div class="score-num">74</div><div class="score-label">エラーハンドリング</div></div>
+      <div class="score-card"><div class="score-num">88</div><div class="score-label">入力補助</div></div>
+    </div>
+    <div class="score-bar-wrap">
+      <div class="bar-row">
+        <span class="bar-label">ラベル設計</span>
+        <div class="bar-track"><div class="bar-fill" style="width:88%;background:linear-gradient(90deg,#3b82f6,#8b5cf6)"></div></div>
+        <span class="bar-val" style="color:#3b82f6">88</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">バリデーション</span>
+        <div class="bar-track"><div class="bar-fill" style="width:74%;background:linear-gradient(90deg,#06b6d4,#3b82f6);animation-delay:.1s"></div></div>
+        <span class="bar-val" style="color:#06b6d4">74</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">モバイル対応</span>
+        <div class="bar-track"><div class="bar-fill" style="width:65%;background:linear-gradient(90deg,#8b5cf6,#ec4899);animation-delay:.2s"></div></div>
+        <span class="bar-val" style="color:#8b5cf6">65</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem">
+  <div class="container">
+    <div class="section-label fade-up">課題</div>
+    <h2 class="fade-up">なぜフォームUXは<br>見落とされるのか</h2>
+    <p class="section-sub fade-up">コンバージョンの最終関門でありながら、定量的な評価手段がなかった。</p>
+    <div class="problem-grid">
+      <div class="problem-card fade-up">
+        <div class="problem-icon">🕐</div>
+        <h3>手動評価に工数がかかる</h3>
+        <p>専門家によるヒューリスティック評価は数日〜1週間。施策サイクルに間に合わない。</p>
+      </div>
+      <div class="problem-card fade-up">
+        <div class="problem-icon">📊</div>
+        <h3>感覚的な議論が続く</h3>
+        <p>「使いにくい気がする」では開発優先度に入らない。スコアがあれば意思決定が変わる。</p>
+      </div>
+      <div class="problem-card fade-up">
+        <div class="problem-icon">🔁</div>
+        <h3>改修後の比較ができない</h3>
+        <p>リリース前後でUXが改善したか数値で検証する仕組みがない。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="section-label fade-up">機能</div>
+    <h2 class="fade-up">診断から改善提案まで<br>ワンストップで</h2>
+    <div class="features-grid">
+      <div class="feature-card fade-up">
+        <div class="feature-num">01</div>
+        <h3>自動UXスコアリング</h3>
+        <p>ラベル設計・バリデーション・エラーメッセージ・アクセシビリティなど10項目を自動採点。100点満点のスコアで可視化します。</p>
+        <span class="tag">Spring Boot API</span>
+      </div>
+      <div class="feature-card alt fade-up">
+        <div class="feature-num">02</div>
+        <h3>AIによる改善提案（日本語）</h3>
+        <p>Claude APIが問題箇所を検出し、「なぜ悪いのか」「どう直すか」を平易な日本語で説明。エンジニアでない担当者にも伝わります。</p>
+        <span class="tag green">Claude API 連携</span>
+      </div>
+      <div class="feature-card fade-up">
+        <div class="feature-num">03</div>
+        <h3>PDFレポート出力</h3>
+        <p>診断結果・スコア・改善提案をまとめたPDFを即座に生成。会議資料・議事録にそのまま添付できます。</p>
+        <span class="tag">OpenPDF</span>
+      </div>
+      <div class="feature-card alt fade-up">
+        <div class="feature-num">04</div>
+        <h3>Before / After 比較</h3>
+        <p>同じフォームを複数時点で診断し、スコアの推移をグラフ表示。改修効果を定量的に示せます。</p>
+        <span class="tag green">履歴管理</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="section-label fade-up">使い方</div>
+    <h2 class="fade-up">3ステップで診断完了</h2>
+    <div class="steps">
+      <div class="step fade-up">
+        <div class="step-circle">1</div>
+        <h3>URLを入力</h3>
+        <p>診断したいフォームページのURLを貼り付けるだけ。インストール不要。</p>
+      </div>
+      <div class="step fade-up">
+        <div class="step-circle">2</div>
+        <h3>AIが自動解析</h3>
+        <p>Spring Boot + Claude APIがフォーム構造を解析し、10項目を採点します。</p>
+      </div>
+      <div class="step fade-up">
+        <div class="step-circle">3</div>
+        <h3>レポートを受け取る</h3>
+        <p>スコア・問題点・改善提案をまとめたPDFをダウンロードして完了。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- METRICS -->
+<section id="metrics">
+  <div class="container" style="text-align:center">
+    <div class="section-label fade-up">実績・想定効果</div>
+    <h2 class="fade-up">数字で見る価値</h2>
+    <div class="metrics-grid">
+      <div class="metric-card fade-up">
+        <div class="metric-val">90%</div>
+        <div class="metric-label">診断時間の短縮<br><span style="font-size:12px">手動評価比較</span></div>
+      </div>
+      <div class="metric-card fade-up">
+        <div class="metric-val">10項目</div>
+        <div class="metric-label">UX評価軸<br><span style="font-size:12px">業界標準に準拠</span></div>
+      </div>
+      <div class="metric-card fade-up">
+        <div class="metric-val">即日</div>
+        <div class="metric-label">導入可能<br><span style="font-size:12px">インストール不要</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="cta-box">
+    <div class="section-label" style="text-align:center">お問い合わせ</div>
+    <h2>まずはデモで<br>試してみませんか</h2>
+    <p>導入のご相談・デモのご依頼はこちらから。<br>担当者より2営業日以内にご連絡します。</p>
+    <form class="contact-form" onsubmit="handleSubmit(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">お名前 *</label>
+          <input type="text" id="name" placeholder="山田 太郎" required>
+        </div>
+        <div class="form-group">
+          <label for="company">会社名</label>
+          <input type="text" id="company" placeholder="株式会社〇〇">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="email">メールアドレス *</label>
+        <input type="email" id="email" placeholder="yourname@company.com" required>
+      </div>
+      <div class="form-group">
+        <label for="inquiry">お問い合わせ種別</label>
+        <select id="inquiry">
+          <option value="">選択してください</option>
+          <option>デモを見たい</option>
+          <option>料金・プランを知りたい</option>
+          <option>導入相談</option>
+          <option>その他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="message">メッセージ</label>
+        <textarea id="message" placeholder="ご質問・ご要望をご記入ください"></textarea>
+      </div>
+      <button type="submit" class="btn-submit">送信する →</button>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">UX Diagnostics</div>
+  <span>© 2025 UX Diagnostics. All rights reserved.</span>
+</footer>
+
+<script>
+  // Scroll animation
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // Form submit
+  function handleSubmit(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('.btn-submit');
+    btn.textContent = '送信しました ✓';
+    btn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
+    btn.disabled = true;
+  }
+</script>
+</body>
+</html>
