@@ -215,11 +215,11 @@
   }
   .problem-card:hover { border-color: rgba(59,130,246,0.3); }
   .problem-icon {
-    width: 48px; height: 48px; border-radius: 12px;
-    background: var(--grad);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; margin-bottom: 20px;
+    width: 40px; height: 40px; margin-bottom: 20px;
+    color: var(--accent1);
   }
+  .problem-card:nth-child(2) .problem-icon { color: var(--accent2); }
+  .problem-card:nth-child(3) .problem-icon { color: var(--accent3); }
   .problem-card h3 { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 10px; }
   .problem-card p { font-size: 15px; color: var(--muted); line-height: 1.7; }
 
@@ -583,17 +583,29 @@
     <p class="section-sub fade-up">コンバージョンの最終関門でありながら、定量的な評価手段がなかった。</p>
     <div class="problem-grid">
       <div class="problem-card fade-up">
-        <div class="problem-icon">🕐</div>
+        <svg class="problem-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="20" cy="20" r="14"/>
+          <polyline points="20,10 20,20 26,24"/>
+        </svg>
         <h3>手動評価に工数がかかる</h3>
         <p>専門家によるヒューリスティック評価は数日〜1週間。施策サイクルに間に合わない。</p>
       </div>
       <div class="problem-card fade-up">
-        <div class="problem-icon">📊</div>
+        <svg class="problem-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6" y="24" width="7" height="10" rx="1"/>
+          <rect x="16.5" y="16" width="7" height="18" rx="1"/>
+          <rect x="27" y="8" width="7" height="26" rx="1"/>
+        </svg>
         <h3>感覚的な議論が続く</h3>
         <p>「使いにくい気がする」では開発優先度に入らない。スコアがあれば意思決定が変わる。</p>
       </div>
       <div class="problem-card fade-up">
-        <div class="problem-icon">🔁</div>
+        <svg class="problem-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 20a12 12 0 0 1 20.5-8.5"/>
+          <path d="M32 20a12 12 0 0 1-20.5 8.5"/>
+          <polyline points="28,8 28.5,11.5 25,12"/>
+          <polyline points="12,28 11.5,31.5 15,32"/>
+        </svg>
         <h3>改修後の比較ができない</h3>
         <p>リリース前後でUXが改善したか数値で検証する仕組みがない。</p>
       </div>
