@@ -475,6 +475,12 @@
   /* scroll animations */
   .fade-up { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
   .fade-up.visible { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    .fade-up { opacity: 1; transform: none; transition: none; }
+    .bar-fill { animation: none; }
+    @keyframes ldot { 0%,100%{transform:scale(1);opacity:1} }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} }
+  }
 </style>
 </head>
 <body>
