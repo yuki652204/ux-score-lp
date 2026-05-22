@@ -361,6 +361,115 @@
     .score-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
+  /* ── DEMO WIDGET ── */
+  .demo-section { display: flex; flex-direction: column; gap: 0; }
+
+  /* URL input row */
+  .demo-url-row {
+    display: flex; gap: 10px; margin-bottom: 10px;
+  }
+  .demo-url-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 16px;
+    color: var(--text);
+    font-family: var(--font-body); font-size: 14px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .demo-url-input::placeholder { color: #3a4a60; }
+  .demo-url-input:focus { border-color: var(--accent1); }
+  .demo-analyze-btn {
+    padding: 13px 24px;
+    background: var(--grad);
+    color: #fff; font-weight: 700; font-size: 14px;
+    border: none; border-radius: 12px; cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 0 24px rgba(59,130,246,.3);
+    transition: transform .15s, box-shadow .15s, opacity .15s;
+  }
+  .demo-analyze-btn:hover { transform: translateY(-1px); box-shadow: 0 0 36px rgba(59,130,246,.45); }
+  .demo-analyze-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+  .demo-url-hint {
+    font-size: 12px; color: #3a4a60; margin-bottom: 24px;
+  }
+  .demo-url-hint span {
+    color: var(--accent3); cursor: pointer; text-decoration: underline dotted;
+  }
+  .demo-url-hint span:hover { color: var(--text); }
+
+  /* Loading state */
+  .demo-loading-body {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 32px 0;
+  }
+  .loading-dots { display: flex; gap: 8px; margin-bottom: 16px; }
+  .loading-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent1);
+    animation: ldot 1.2s ease-in-out infinite;
+  }
+  .loading-dot:nth-child(2) { animation-delay: .2s; background: var(--accent2); }
+  .loading-dot:nth-child(3) { animation-delay: .4s; background: var(--accent3); }
+  @keyframes ldot { 0%,80%,100%{transform:scale(.6);opacity:.4} 40%{transform:scale(1);opacity:1} }
+  .loading-text { font-size: 14px; color: var(--muted); }
+
+  /* Score circle */
+  .result-header {
+    display: flex; align-items: center; gap: 24px; margin-bottom: 20px;
+  }
+  .score-circle-wrap {
+    position: relative; flex-shrink: 0;
+    width: 100px; height: 100px;
+  }
+  .score-ring { width: 100%; height: 100%; }
+  .score-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .score-big {
+    font-family: var(--font-display);
+    font-size: 28px; font-weight: 800; line-height: 1;
+    background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .score-unit { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .score-summary h3 {
+    font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 6px;
+  }
+  .score-summary p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* Action buttons */
+  .demo-actions {
+    display: flex; gap: 12px; margin-top: 20px;
+  }
+  .btn-share {
+    flex: 1; padding: 13px;
+    background: rgba(59,130,246,.12);
+    border: 1px solid rgba(59,130,246,.25);
+    color: var(--accent1); font-weight: 600; font-size: 13px;
+    border-radius: 10px; cursor: pointer;
+    transition: background .2s;
+    font-family: var(--font-body);
+  }
+  .btn-share:hover { background: rgba(59,130,246,.22); }
+  .btn-report {
+    flex: 2; padding: 13px;
+    background: var(--grad);
+    color: #fff; font-weight: 700; font-size: 13px;
+    border: none; border-radius: 10px; cursor: pointer;
+    box-shadow: 0 0 20px rgba(59,130,246,.25);
+    font-family: var(--font-body);
+    transition: opacity .2s;
+  }
+  .btn-report:hover { opacity: .88; }
+  .demo-reset {
+    text-align: center; margin-top: 14px;
+    font-size: 12px; color: #3a4a60; cursor: pointer;
+  }
+  .demo-reset:hover { color: var(--muted); }
+
   /* scroll animations */
   .fade-up { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
   .fade-up.visible { opacity: 1; transform: translateY(0); }
@@ -390,35 +499,77 @@
     <a href="#features" class="btn-secondary">機能を見る</a>
   </div>
 
-  <!-- Score Mockup -->
-  <div class="hero-mockup">
+  <!-- Demo Widget -->
+  <div class="hero-mockup" id="demoWidget">
     <div class="mockup-header">
       <div class="dot" style="background:#ff5f57"></div>
       <div class="dot" style="background:#ffbd2e"></div>
       <div class="dot" style="background:#28c840"></div>
-      <span style="margin-left:8px;font-size:13px;color:var(--muted)">UX診断レポート — checkout.example.com</span>
+      <span style="margin-left:8px;font-size:13px;color:var(--muted)" id="demoTitle">フォームUX診断ツール</span>
     </div>
-    <div class="score-grid">
-      <div class="score-card"><div class="score-num">82</div><div class="score-label">総合スコア</div></div>
-      <div class="score-card"><div class="score-num">91</div><div class="score-label">アクセシビリティ</div></div>
-      <div class="score-card"><div class="score-num">74</div><div class="score-label">エラーハンドリング</div></div>
-      <div class="score-card"><div class="score-num">88</div><div class="score-label">入力補助</div></div>
-    </div>
-    <div class="score-bar-wrap">
-      <div class="bar-row">
-        <span class="bar-label">ラベル設計</span>
-        <div class="bar-track"><div class="bar-fill" style="width:88%;background:linear-gradient(90deg,#3b82f6,#8b5cf6)"></div></div>
-        <span class="bar-val" style="color:#3b82f6">88</span>
+
+    <div class="demo-section">
+      <!-- STATE 1: URL INPUT -->
+      <div id="stateInput">
+        <div class="demo-url-row">
+          <input class="demo-url-input" type="url" id="urlInput"
+            placeholder="https://example.com/checkout">
+          <button class="demo-analyze-btn" id="analyzeBtn" onclick="startAnalysis()">診断スタート →</button>
+        </div>
+        <div class="demo-url-hint">
+          例: <span onclick="fillSample()">https://amazon.co.jp/checkout</span> を試してみる
+        </div>
       </div>
-      <div class="bar-row">
-        <span class="bar-label">バリデーション</span>
-        <div class="bar-track"><div class="bar-fill" style="width:74%;background:linear-gradient(90deg,#06b6d4,#3b82f6);animation-delay:.1s"></div></div>
-        <span class="bar-val" style="color:#06b6d4">74</span>
+
+      <!-- STATE 2: LOADING -->
+      <div id="stateLoading" style="display:none">
+        <div class="demo-loading-body">
+          <div class="loading-dots">
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+          </div>
+          <div class="loading-text">フォームを解析中...</div>
+        </div>
       </div>
-      <div class="bar-row">
-        <span class="bar-label">モバイル対応</span>
-        <div class="bar-track"><div class="bar-fill" style="width:65%;background:linear-gradient(90deg,#8b5cf6,#ec4899);animation-delay:.2s"></div></div>
-        <span class="bar-val" style="color:#8b5cf6">65</span>
+
+      <!-- STATE 3: RESULTS -->
+      <div id="stateResult" style="display:none">
+        <div class="result-header">
+          <div class="score-circle-wrap">
+            <svg class="score-ring" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+              <circle id="scoreArc" cx="50" cy="50" r="44" fill="none"
+                stroke="url(#scoreGrad)" stroke-width="6"
+                stroke-linecap="round"
+                stroke-dasharray="276.46"
+                stroke-dashoffset="276.46"
+                transform="rotate(-90 50 50)"/>
+              <defs>
+                <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#3b82f6"/>
+                  <stop offset="100%" stop-color="#8b5cf6"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="score-center">
+              <span class="score-big" id="scoreNum">0</span>
+              <span class="score-unit">/ 100</span>
+            </div>
+          </div>
+          <div class="score-summary">
+            <h3>総合UXスコア: 78 / 100</h3>
+            <p>バリデーション設計とモバイル対応に<br>改善余地があります。</p>
+          </div>
+        </div>
+
+        <div id="dimBars"></div>
+
+        <div class="demo-actions" id="demoActions" style="opacity:0;transition:opacity .4s">
+          <button class="btn-share" onclick="shareResult()">🔗 結果をシェア</button>
+          <button class="btn-report" onclick="requestReport()">📄 詳細レポートを受け取る →</button>
+        </div>
+        <div class="demo-reset" onclick="resetDemo()">← 別のURLで試す</div>
       </div>
     </div>
   </div>
@@ -583,6 +734,109 @@
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
   }, { threshold: 0.12 });
   document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // ── DEMO WIDGET ──
+  const FAKE = {
+    total: 78,
+    dims: [
+      { label: 'ラベル設計',         val: 88, grad: 'linear-gradient(90deg,#3b82f6,#8b5cf6)', col: '#3b82f6' },
+      { label: 'バリデーション',     val: 74, grad: 'linear-gradient(90deg,#06b6d4,#3b82f6)', col: '#06b6d4' },
+      { label: 'エラーハンドリング', val: 71, grad: 'linear-gradient(90deg,#06b6d4,#3b82f6)', col: '#06b6d4' },
+      { label: 'モバイル対応',       val: 61, grad: 'linear-gradient(90deg,#8b5cf6,#ec4899)', col: '#8b5cf6' },
+      { label: 'アクセシビリティ',   val: 82, grad: 'linear-gradient(90deg,#10b981,#06b6d4)', col: '#10b981' },
+    ]
+  };
+
+  function fillSample() {
+    document.getElementById('urlInput').value = 'https://amazon.co.jp/checkout';
+  }
+
+  function startAnalysis() {
+    const url = document.getElementById('urlInput').value.trim();
+    if (!url) { document.getElementById('urlInput').focus(); return; }
+
+    const host = (() => { try { return new URL(url).hostname; } catch(e) { return url.slice(0, 30); } })();
+    document.getElementById('demoTitle').textContent = 'UX診断レポート — ' + host;
+
+    document.getElementById('stateInput').style.display = 'none';
+    document.getElementById('stateLoading').style.display = '';
+    document.getElementById('stateResult').style.display = 'none';
+    document.getElementById('analyzeBtn').disabled = true;
+
+    setTimeout(() => {
+      document.getElementById('stateLoading').style.display = 'none';
+      document.getElementById('stateResult').style.display = '';
+      buildBars();
+      animateScore(FAKE.total);
+      setTimeout(animateBars, 300);
+      setTimeout(() => { document.getElementById('demoActions').style.opacity = '1'; },
+        300 + FAKE.dims.length * 150 + 400);
+    }, 2500);
+  }
+
+  function buildBars() {
+    document.getElementById('dimBars').innerHTML = FAKE.dims.map((d, i) => `
+      <div class="bar-row">
+        <span class="bar-label">${d.label}</span>
+        <div class="bar-track">
+          <div id="bar${i}" style="height:100%;border-radius:3px;width:0%;background:${d.grad};transition:width .5s ease"></div>
+        </div>
+        <span id="barval${i}" class="bar-val" style="color:${d.col};opacity:0;transition:opacity .3s">0</span>
+      </div>`).join('');
+  }
+
+  function animateScore(target) {
+    const arc = document.getElementById('scoreArc');
+    const numEl = document.getElementById('scoreNum');
+    const circ = 276.46;
+    const start = performance.now();
+    const duration = 2000;
+    (function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const e = 1 - Math.pow(1 - p, 3);
+      const cur = Math.round(e * target);
+      numEl.textContent = cur;
+      arc.style.strokeDashoffset = circ * (1 - e * target / 100);
+      if (p < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+
+  function animateBars() {
+    FAKE.dims.forEach((d, i) => {
+      setTimeout(() => {
+        const fill = document.getElementById('bar' + i);
+        const val  = document.getElementById('barval' + i);
+        if (fill) fill.style.width = d.val + '%';
+        if (val)  { val.textContent = d.val; val.style.opacity = '1'; }
+      }, i * 150);
+    });
+  }
+
+  function shareResult() {
+    const fake = window.location.origin + '/result/demo-' + Math.random().toString(36).slice(2, 8);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(fake).then(() => {
+        const btn = document.querySelector('.btn-share');
+        const orig = btn.textContent;
+        btn.textContent = '✓ URLをコピーしました';
+        setTimeout(() => { btn.textContent = orig; }, 2000);
+      });
+    }
+  }
+
+  function requestReport() {
+    document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function resetDemo() {
+    document.getElementById('stateInput').style.display = '';
+    document.getElementById('stateLoading').style.display = 'none';
+    document.getElementById('stateResult').style.display = 'none';
+    document.getElementById('demoActions').style.opacity = '0';
+    document.getElementById('demoTitle').textContent = 'フォームUX診断ツール';
+    document.getElementById('analyzeBtn').disabled = false;
+    document.getElementById('urlInput').value = '';
+  }
 
   // Form submit
   function handleSubmit(e) {
